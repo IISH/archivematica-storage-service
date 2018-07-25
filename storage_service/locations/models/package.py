@@ -2110,7 +2110,7 @@ class Package(models.Model):
                 to_be_compressed, was_compressed,
                 compression, rein_aip_internal_path,
                 extract_path_to_delete))
-        self.size = _recalculate_size(updated_aip_path)
+        self.size = utils.recalculate_size(updated_aip_path)
 
         # 7. Create a pointer file if AM has not done so.
         if (self.package_type in (Package.AIP, Package.AIC) and
@@ -2646,22 +2646,6 @@ def _replace_old_metdata_with_reingested(rein_aip_internal_path,
         distutils.dir_util.copy_tree(
             internal_metadata_dir,
             this_metadata_dir)
-
-
-def _recalculate_size(rein_aip_internal_path):
-    """Recalculate size: it may have changed because of changed preservation
-    derivatives or because of a metadata-only reingest. If the AIP is a
-    directory, then calculate the size recursively.
-    """
-    if os.path.isdir(rein_aip_internal_path):
-        size = 0
-        for dirpath, ___, filenames in os.walk(rein_aip_internal_path):
-            for filename in filenames:
-                file_path = os.path.join(dirpath, filename)
-                size += os.path.getsize(file_path)
-    else:
-        size = os.path.getsize(rein_aip_internal_path)
-    return size
 
 
 def _find_compression_event(events):
